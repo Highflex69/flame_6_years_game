@@ -9,14 +9,15 @@ environment:
   sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
+  flame: ^1.10.0
+  flame_forge2d: ^0.15.1
   flutter:
     sdk: flutter
-  flame: ^1.10.0
 dev_dependencies:
+  flame_lint: ^1.1.1
+  flutter_lints: ^3.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
-  flame_lint: ^1.1.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -26,5 +27,6 @@ flutter:
   uses-material-design: true
 
   assets:
-  - assets/images/fish_1.png
-  - assets/images/fishing_hook.png
+    - assets/images/fish_1.png
+    - assets/images/fishing_hook.png
+    - assets/images/player_idle.png
