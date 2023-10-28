@@ -8,11 +8,10 @@ import 'package:untitled/player.dart';
 
 class Fish extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame> {
-  Fish({Vector2? pos, this.isEnemy = false})
+  Fish({this.startPosY, this.isEnemy = false})
       : super(
           anchor: Anchor.center,
           priority: 2,
-          position: pos ?? Vector2.zero(),
         );
 
   // TODO(Teddy): remove debug when done
@@ -20,6 +19,7 @@ class Fish extends SpriteAnimationComponent
   bool get debugMode => true;
 
   final bool isEnemy;
+  final double? startPosY;
 
   @override
   Future<void> onLoad() async {
@@ -27,7 +27,7 @@ class Fish extends SpriteAnimationComponent
     size = Vector2.all(fishSize);
     position = Vector2(
       size.x / 2,
-      rng.nextInt((SeaMap.heightSize - size.y).toInt()) + size.y,
+      rng.nextInt((SeaMap.heightSize - size.y).toInt()) + (startPosY ?? size.y),
     );
 
     animation = await game.loadSpriteAnimation(
@@ -38,12 +38,12 @@ class Fish extends SpriteAnimationComponent
         textureSize: Vector2.all(48),
       ),
     );
-    add(RectangleHitbox.relative(Vector2(1, 0.5), parentSize: size));
+    add(RectangleHitbox.relative(Vector2(0.8, 0.3), parentSize: size));
     add(
       MoveEffect.to(
         Vector2(SeaMap.widthSize - (size.x / 2), position.y),
         EffectController(
-          duration: 4, //rng.nextInt(5) + 1,
+          duration: rng.nextInt(5) + 2,
           reverseDuration: 3,
           infinite: true,
           curve: Curves.easeOut,
@@ -60,12 +60,7 @@ class Fish extends SpriteAnimationComponent
     super.onCollisionStart(intersectionPoints, other);
     if (other is Player) {
       gameRef.gameOver();
-      if (isEnemy) {
-        gameRef.gameOver();
-      } else {
-        gameRef.fishCaughtCount += 1;
-        removeFromParent();
-      }
+      removeFromParent();
     }
   }
 }

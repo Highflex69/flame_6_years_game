@@ -23,18 +23,19 @@ class FlameCompetitionGame extends FlameGame
   FlameCompetitionGame() : super();
 
   final Player player = Player();
-  GameState state = GameState.intro;
+  GameState state = GameState.gameOver;
 
   late final TextComponent scoreText;
   int fishCaughtCount = 0;
   int mapAdded = 1;
   int _score = 0;
+  int _highScore = 0;
 
   int get score => _score;
 
   set score(int newScore) {
     _score = newScore + (fishCaughtCount * 10);
-    scoreText.text = 'Depth/Score: $_score \nFish: $fishCaughtCount';
+    scoreText.text = 'Score: $_score Highscore: $_highScore';
   }
 
   @override
@@ -43,30 +44,28 @@ class FlameCompetitionGame extends FlameGame
     world.add(player);
     world.add(SeaMap(playerRef: player));
     _generateFishes();
-
     camera.follow(player, maxSpeed: 400);
     camera.viewport.add(scoreText = TextComponent(position: Vector2(20, 20)));
-
     score = 0;
   }
 
-  void _generateFishes() {
-    for (var i = 0; i < 10; i++) {
-      world.add(Fish());
+  void _generateFishes({double? startPos}) {
+    for (var i = 0; i < 20; i++) {
+      world.add(
+        Fish(startPosY: startPos),
+      );
     }
   }
 
   @override
   void onScroll(PointerScrollInfo info) {
-    //final speedReduction = fishCaughtCount * 0.2;
+    if (state == GameState.gameOver) {
+      return;
+    }
     if (info.scrollDelta.global.y.isNegative) {
-      if (state == GameState.intro) {
-        state = GameState.playing;
-      }
       player.velocity.y = 1;
     } else {
-      player.velocity.y =
-          -1.5; //speedReduction <= 1 ? -1.5 + speedReduction : -0.2;
+      player.velocity.y = -1.5;
     }
   }
 
@@ -77,12 +76,17 @@ class FlameCompetitionGame extends FlameGame
       ),
     );
     mapAdded += 1;
-    _generateFishes();
+    _generateFishes(
+      startPos: (SeaMap.heightSize * mapAdded) - SeaMap.heightSize,
+    );
   }
 
   void gameOver() {
     if (state != GameState.gameOver) {
       state = GameState.gameOver;
+      score = _highScore = _highScore < _score ? _score : _highScore;
+      camera.follow(player, snap: true);
+      player.velocity.y = 0;
       player.add(
         MoveEffect.to(
           Player.startPos,

@@ -1,15 +1,12 @@
 import 'package:flame/components.dart';
-import 'package:flame/experimental.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled/main.dart';
 import 'package:untitled/player.dart';
 
 class SeaMap extends PositionComponent with HasGameRef<FlameCompetitionGame> {
   static const double widthSize = 750;
-  static const double heightSize = 1000;
+  static const double heightSize = 5000;
   static const Rect _bounds = Rect.fromLTRB(0, 0, widthSize, heightSize);
-  static final Rectangle bounds =
-      Rectangle.fromLTRB(0, 0, widthSize, heightSize);
 
   static final Paint _paintBg = Paint()..color = Colors.lightBlue;
 

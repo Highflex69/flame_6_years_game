@@ -48,7 +48,7 @@ class Player extends SpriteComponent
         (SeaMap.widthSize / 2) - scaledPlayerSize,
         position.y - scaledPlayerSize,
       ),
-    )..debugMode = false;
+    )..debugMode = true;
     sprite = await game.loadSprite(
       'fishing_hook.png',
       srcSize: Vector2.all(32),
@@ -60,19 +60,18 @@ class Player extends SpriteComponent
   @override
   void update(double dt) {
     super.update(dt);
-    if (gameRef.state != GameState.gameOver) {
-      position.add(velocity * (speed * dt));
-      position.clamp(
-        minPosition,
-        Vector2(maxPosition.x, maxPosition.y * gameRef.mapAdded),
-      );
-      if (gameRef.state == GameState.playing) {
-        gameRef.score = position.y.toInt();
-        position.add(Vector2(0, droppingSpeed * dt));
-        if ((position.y - SeaMap.heightSize * gameRef.mapAdded) >
-            -(gameRef.camera.visibleWorldRect.height * 0.3)) {
-          gameRef.generateMap();
-        }
+    position.add(velocity * (speed * dt));
+    position.clamp(
+      minPosition,
+      Vector2(maxPosition.x, maxPosition.y * gameRef.mapAdded),
+    );
+
+    if (gameRef.state == GameState.playing) {
+      gameRef.score = position.y.toInt();
+      position.add(Vector2(0, droppingSpeed * dt));
+      if ((position.y - SeaMap.heightSize * gameRef.mapAdded) >
+          -(gameRef.camera.visibleWorldRect.height * 0.4)) {
+        gameRef.generateMap();
       }
     }
   }
@@ -89,6 +88,9 @@ class Player extends SpriteComponent
       velocity.x = isKeyDown ? 1 : 0;
       handled = true;
     } else if (event.logicalKey == LogicalKeyboardKey.space) {
+      if (gameRef.state != GameState.playing) {
+        gameRef.state = GameState.playing;
+      }
       velocity.y = isKeyDown ? -1 : 0;
       handled = true;
     } else {
