@@ -28,5 +28,8 @@ flutter:
 
   assets:
     - assets/images/fish_1.png
+    - assets/images/fish_2.png
+    - assets/images/fish_3.png
+    - assets/images/fish_4.png
     - assets/images/fishing_hook.png
     - assets/images/player_idle.png

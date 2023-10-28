@@ -8,21 +8,20 @@ class Player extends SpriteComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame>, KeyboardHandler {
   final Vector2 velocity = Vector2.zero();
   late final maxPosition =
-      Vector2(SeaMap.width - size.x / 2, SeaMap.height - (size.y / 2));
-  late final minPosition = Vector2(-(size.x / 2), 0);
+      Vector2(SeaMap.widthSize - size.x / 2, SeaMap.heightSize - (size.y / 2));
+  late final minPosition = Vector2(-(size.x / 4), 0);
   static const double speed = 300;
   static const double droppingSpeed = 100;
 
-  bool hasGameStarted = false;
-
   static const scaledPlayerSize = 48 * 4;
   static const hookScale = 0.8;
+  static final Vector2 startPos = Vector2((SeaMap.widthSize / 2) - 48, 0);
 
   Player()
       : super(
           priority: 2,
           size: Vector2.all(100),
-          position: Vector2((SeaMap.width / 2) - 48, 0),
+          position: startPos,
           scale: Vector2.all(hookScale),
         );
 
@@ -46,7 +45,7 @@ class Player extends SpriteComponent
       ),
       scale: Vector2.all(4),
       position: Vector2(
-        (SeaMap.width / 2) - scaledPlayerSize,
+        (SeaMap.widthSize / 2) - scaledPlayerSize,
         position.y - scaledPlayerSize,
       ),
     )..debugMode = false;
@@ -61,10 +60,20 @@ class Player extends SpriteComponent
   @override
   void update(double dt) {
     super.update(dt);
-    position.add(velocity * (speed * dt));
-    position.clamp(minPosition, maxPosition);
-    if (hasGameStarted) {
-      position.add(Vector2(0, droppingSpeed * dt));
+    if (gameRef.state != GameState.gameOver) {
+      position.add(velocity * (speed * dt));
+      position.clamp(
+        minPosition,
+        Vector2(maxPosition.x, maxPosition.y * gameRef.mapAdded),
+      );
+      if (gameRef.state == GameState.playing) {
+        gameRef.score = position.y.toInt();
+        position.add(Vector2(0, droppingSpeed * dt));
+        if ((position.y - SeaMap.heightSize * gameRef.mapAdded) >
+            -(gameRef.camera.visibleWorldRect.height * 0.3)) {
+          gameRef.generateMap();
+        }
+      }
     }
   }
 
@@ -79,17 +88,8 @@ class Player extends SpriteComponent
     } else if (event.logicalKey == LogicalKeyboardKey.keyD) {
       velocity.x = isKeyDown ? 1 : 0;
       handled = true;
-    } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
-      velocity.y = isKeyDown ? 0.5 : 0;
-      handled = true;
     } else if (event.logicalKey == LogicalKeyboardKey.space) {
-      if (!hasGameStarted) {
-        hasGameStarted = true;
-      }
-      //velocity.y = isKeyDown ? -1 : 0;
-      gameRef.caughtCount = gameRef.caughtCount > 0
-          ? gameRef.caughtCount - 1
-          : gameRef.caughtCount;
+      velocity.y = isKeyDown ? -1 : 0;
       handled = true;
     } else {
       handled = false;

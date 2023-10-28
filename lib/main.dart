@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -19,25 +20,34 @@ class FlameCompetitionGame extends FlameGame
         HasKeyboardHandlerComponents,
         ScrollDetector,
         MouseMovementDetector {
-  FlameCompetitionGame()
-      : super(
-          camera: CameraComponent.withFixedResolution(
-            width: 1500,
-            height: 1280,
-          ),
-        );
+  FlameCompetitionGame() : super();
 
   final Player player = Player();
-  int caughtCount = 1;
+  GameState state = GameState.intro;
+
+  late final TextComponent scoreText;
+  int fishCaughtCount = 0;
+  int mapAdded = 1;
+  int _score = 0;
+
+  int get score => _score;
+
+  set score(int newScore) {
+    _score = newScore + (fishCaughtCount * 10);
+    scoreText.text = 'Depth/Score: $_score \nFish: $fishCaughtCount';
+  }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    world.add(SeaMap());
-    _generateFishes();
     world.add(player);
-    camera.follow(player, maxSpeed: 250);
+    world.add(SeaMap(playerRef: player));
+    _generateFishes();
+
+    camera.follow(player, maxSpeed: 400);
+    camera.viewport.add(scoreText = TextComponent(position: Vector2(20, 20)));
+
+    score = 0;
   }
 
   void _generateFishes() {
@@ -46,24 +56,48 @@ class FlameCompetitionGame extends FlameGame
     }
   }
 
-/*
-  @override
-  void onMouseMove(PointerHoverInfo info) {
-    super.onMouseMove(info);
-    if (info.raw.localDelta.dx.isNegative) {
-      player.velocity.x = -1 * 0.8;
-    } else {
-      player.velocity.x = 1 * 0.8;
-    }
-  }*/
-
   @override
   void onScroll(PointerScrollInfo info) {
-    final speedReduction = caughtCount * 0.2;
+    //final speedReduction = fishCaughtCount * 0.2;
     if (info.scrollDelta.global.y.isNegative) {
+      if (state == GameState.intro) {
+        state = GameState.playing;
+      }
       player.velocity.y = 1;
     } else {
-      player.velocity.y = speedReduction <= 1 ? -1.5 + speedReduction : -0.2;
+      player.velocity.y =
+          -1.5; //speedReduction <= 1 ? -1.5 + speedReduction : -0.2;
     }
   }
+
+  void generateMap() {
+    world.add(
+      SeaMap(
+        pos: Vector2(0, SeaMap.heightSize * mapAdded),
+      ),
+    );
+    mapAdded += 1;
+    _generateFishes();
+  }
+
+  void gameOver() {
+    if (state != GameState.gameOver) {
+      state = GameState.gameOver;
+      player.add(
+        MoveEffect.to(
+          Player.startPos,
+          EffectController(
+            duration: 1,
+            curve: Curves.easeIn,
+          ),
+        ),
+      );
+    }
+  }
+}
+
+enum GameState {
+  intro,
+  playing,
+  gameOver;
 }
