@@ -8,26 +8,24 @@ import 'package:untitled/player.dart';
 
 class Fish extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame> {
-  Fish({this.startPosY, this.isEnemy = false})
+  static int maxSize = 130;
+
+  Fish({this.minStartPosY})
       : super(
           anchor: Anchor.center,
           priority: 2,
         );
 
-  // TODO(Teddy): remove debug when done
-  @override
-  bool get debugMode => true;
-
-  final bool isEnemy;
-  final double? startPosY;
+  final double? minStartPosY;
 
   @override
   Future<void> onLoad() async {
-    final fishSize = (rng.nextInt(130) + 100).toDouble();
+    final fishSize = (rng.nextInt(maxSize) + 100).toDouble();
     size = Vector2.all(fishSize);
     position = Vector2(
       size.x / 2,
-      rng.nextInt((SeaMap.heightSize - size.y).toInt()) + (startPosY ?? size.y),
+      rng.nextInt((SeaMap.heightSize - size.y).toInt()) +
+          (minStartPosY ?? size.y),
     );
 
     animation = await game.loadSpriteAnimation(
@@ -39,12 +37,13 @@ class Fish extends SpriteAnimationComponent
       ),
     );
     add(RectangleHitbox.relative(Vector2(0.8, 0.3), parentSize: size));
+    final movementSpeed = rng.nextInt(5) + 1.0;
     add(
       MoveEffect.to(
         Vector2(SeaMap.widthSize - (size.x / 2), position.y),
         EffectController(
-          duration: rng.nextInt(5) + 2,
-          reverseDuration: 3,
+          duration: movementSpeed,
+          reverseDuration: movementSpeed,
           infinite: true,
           curve: Curves.easeOut,
         ),
@@ -58,9 +57,16 @@ class Fish extends SpriteAnimationComponent
     PositionComponent other,
   ) {
     super.onCollisionStart(intersectionPoints, other);
+
     if (other is Player) {
       gameRef.gameOver();
-      removeFromParent();
+      if (gameRef.state == GameState.gameOver) {
+        gameRef.setScore(addFishCaughtCount: 1);
+        gameRef.player.add(
+          SpriteAnimationComponent(animation: animation, size: size),
+        );
+        removeFromParent();
+      }
     }
   }
 }

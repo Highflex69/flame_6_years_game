@@ -1,26 +1,26 @@
 import 'package:flame/components.dart';
+import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled/main.dart';
 import 'package:untitled/player.dart';
 
 class SeaMap extends PositionComponent with HasGameRef<FlameCompetitionGame> {
-  static const double widthSize = 750;
-  static const double heightSize = 5000;
+  static const double widthSize = 1000;
+  static const double heightSize = 4000;
   static const Rect _bounds = Rect.fromLTRB(0, 0, widthSize, heightSize);
-
-  static final Paint _paintBg = Paint()..color = Colors.lightBlue;
-
+  final double darken;
   final Player? playerRef;
 
-  SeaMap({Vector2? pos, this.playerRef})
+  SeaMap({Vector2? pos, this.playerRef, this.darken = 0})
       : super(
           priority: playerRef != null ? 1 : 0,
-          position: pos ?? Vector2(0, 0),
+          position: pos ?? Vector2.zero(),
         );
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(_bounds, _paintBg);
+    final backgroundPaint = Paint()..color = Colors.lightBlue.darken(darken);
+    canvas.drawRect(_bounds, backgroundPaint);
     if (playerRef != null) {
       canvas.drawLine(
         const Offset((SeaMap.widthSize / 2) - 18, 0),

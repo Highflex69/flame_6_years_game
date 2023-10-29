@@ -6,16 +6,16 @@ import 'package:untitled/map.dart';
 
 class Player extends SpriteComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame>, KeyboardHandler {
-  final Vector2 velocity = Vector2.zero();
-  late final maxPosition =
-      Vector2(SeaMap.widthSize - size.x / 2, SeaMap.heightSize - (size.y / 2));
-  late final minPosition = Vector2(-(size.x / 4), 0);
   static const double speed = 300;
   static const double droppingSpeed = 100;
 
   static const scaledPlayerSize = 48 * 4;
   static const hookScale = 0.8;
   static final Vector2 startPos = Vector2((SeaMap.widthSize / 2) - 48, 0);
+  final Vector2 velocity = Vector2.zero();
+  late final maxPosition =
+      Vector2(SeaMap.widthSize - size.x / 2, SeaMap.heightSize - (size.y / 2));
+  late SpriteAnimationComponent playerAnimation;
 
   Player()
       : super(
@@ -24,12 +24,6 @@ class Player extends SpriteComponent
           position: startPos,
           scale: Vector2.all(hookScale),
         );
-
-  late SpriteAnimationComponent playerAnimation;
-
-  // TODO(Teddy): remove debug when done
-  @override
-  bool get debugMode => true;
 
   @override
   Future<void> onLoad() async {
@@ -48,11 +42,9 @@ class Player extends SpriteComponent
         (SeaMap.widthSize / 2) - scaledPlayerSize,
         position.y - scaledPlayerSize,
       ),
-    )..debugMode = true;
-    sprite = await game.loadSprite(
-      'fishing_hook.png',
-      srcSize: Vector2.all(32),
     );
+    sprite =
+        await game.loadSprite('fishing_hook.png', srcSize: Vector2.all(32));
     add(RectangleHitbox.relative(Vector2(0.5, 0.5), parentSize: size));
     gameRef.world.add(playerAnimation);
   }
@@ -62,15 +54,15 @@ class Player extends SpriteComponent
     super.update(dt);
     position.add(velocity * (speed * dt));
     position.clamp(
-      minPosition,
+      Vector2(-(size.x / 4), 0),
       Vector2(maxPosition.x, maxPosition.y * gameRef.mapAdded),
     );
 
     if (gameRef.state == GameState.playing) {
-      gameRef.score = position.y.toInt();
+      gameRef.setScore(newScore: position.y.toInt());
       position.add(Vector2(0, droppingSpeed * dt));
       if ((position.y - SeaMap.heightSize * gameRef.mapAdded) >
-          -(gameRef.camera.visibleWorldRect.height * 0.4)) {
+          -(SeaMap.heightSize * 0.8)) {
         gameRef.generateMap();
       }
     }
@@ -81,17 +73,17 @@ class Player extends SpriteComponent
     final isKeyDown = event is RawKeyDownEvent;
 
     final bool handled;
+    final speed = (gameRef.state == GameState.gameOver ? 2.0 : 1.0);
     if (event.logicalKey == LogicalKeyboardKey.keyA) {
-      velocity.x = isKeyDown ? -1 : 0;
+      velocity.x = isKeyDown ? -speed : 0;
       handled = true;
     } else if (event.logicalKey == LogicalKeyboardKey.keyD) {
-      velocity.x = isKeyDown ? 1 : 0;
+      velocity.x = isKeyDown ? speed : 0;
       handled = true;
     } else if (event.logicalKey == LogicalKeyboardKey.space) {
-      if (gameRef.state != GameState.playing) {
+      if (gameRef.state == GameState.intro) {
         gameRef.state = GameState.playing;
       }
-      velocity.y = isKeyDown ? -1 : 0;
       handled = true;
     } else {
       handled = false;

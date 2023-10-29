@@ -10,9 +10,7 @@ import 'package:untitled/player.dart';
 
 final rng = Random();
 
-void main() {
-  runApp(GameWidget(game: FlameCompetitionGame()));
-}
+void main() => runApp(GameWidget(game: FlameCompetitionGame()));
 
 class FlameCompetitionGame extends FlameGame
     with
@@ -20,21 +18,23 @@ class FlameCompetitionGame extends FlameGame
         HasKeyboardHandlerComponents,
         ScrollDetector,
         MouseMovementDetector {
-  FlameCompetitionGame() : super();
-
   final Player player = Player();
-  GameState state = GameState.gameOver;
-
   late final TextComponent scoreText;
-  int fishCaughtCount = 0;
+  GameState state = GameState.intro;
   int mapAdded = 1;
   int _score = 0;
   int _highScore = 0;
 
-  int get score => _score;
-
-  set score(int newScore) {
-    _score = newScore + (fishCaughtCount * 10);
+  void setScore({int? newScore, int? addFishCaughtCount}) {
+    if (newScore != null) {
+      _score = newScore;
+    }
+    if (addFishCaughtCount != null) {
+      _score += addFishCaughtCount * 10;
+    }
+    if (state == GameState.gameOver) {
+      _highScore = _highScore < _score ? _score : _highScore;
+    }
     scoreText.text = 'Score: $_score Highscore: $_highScore';
   }
 
@@ -44,28 +44,31 @@ class FlameCompetitionGame extends FlameGame
     world.add(player);
     world.add(SeaMap(playerRef: player));
     _generateFishes();
-    camera.follow(player, maxSpeed: 400);
-    camera.viewport.add(scoreText = TextComponent(position: Vector2(20, 20)));
-    score = 0;
-  }
-
-  void _generateFishes({double? startPos}) {
-    for (var i = 0; i < 20; i++) {
-      world.add(
-        Fish(startPosY: startPos),
-      );
-    }
+    camera.follow(player, maxSpeed: 600);
+    camera.viewport.add(
+      scoreText = TextComponent(
+        position: Vector2.all(20),
+        scale: Vector2.all(1.5),
+      ),
+    );
+    setScore(newScore: 0);
   }
 
   @override
   void onScroll(PointerScrollInfo info) {
-    if (state == GameState.gameOver) {
+    if (state != GameState.playing) {
       return;
     }
     if (info.scrollDelta.global.y.isNegative) {
       player.velocity.y = 1;
     } else {
-      player.velocity.y = -1.5;
+      player.velocity.y = -1.6;
+    }
+  }
+
+  void _generateFishes({double? minStartPosY}) {
+    for (var i = 0; i < (SeaMap.heightSize / Fish.maxSize * 0.65); i++) {
+      world.add(Fish(minStartPosY: minStartPosY));
     }
   }
 
@@ -73,30 +76,41 @@ class FlameCompetitionGame extends FlameGame
     world.add(
       SeaMap(
         pos: Vector2(0, SeaMap.heightSize * mapAdded),
+        darken: mapAdded / 10 < 1 ? mapAdded / 10 : 0.9,
       ),
     );
     mapAdded += 1;
     _generateFishes(
-      startPos: (SeaMap.heightSize * mapAdded) - SeaMap.heightSize,
+      minStartPosY: (SeaMap.heightSize * mapAdded) - SeaMap.heightSize,
     );
   }
 
   void gameOver() {
     if (state != GameState.gameOver) {
       state = GameState.gameOver;
-      score = _highScore = _highScore < _score ? _score : _highScore;
+      setScore(newScore: _score);
       camera.follow(player, snap: true);
       player.velocity.y = 0;
       player.add(
         MoveEffect.to(
           Player.startPos,
           EffectController(
-            duration: 1,
+            duration: mapAdded.toDouble(),
             curve: Curves.easeIn,
           ),
+          onComplete: restartGame,
         ),
       );
     }
+  }
+
+  Future<void> restartGame() async {
+    await Future.delayed(const Duration(seconds: 1));
+    state = GameState.intro;
+    mapAdded = 1;
+    world.removeWhere((c) => c is Fish);
+    player.removeWhere((c) => c is SpriteAnimationComponent);
+    _generateFishes();
   }
 }
 
