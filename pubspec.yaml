@@ -11,10 +11,10 @@ environment:
 dependencies:
   flame: ^1.10.0
   flame_forge2d: ^0.15.1
+  flame_lint: ^1.1.1
   flutter:
     sdk: flutter
 dev_dependencies:
-  flame_lint: ^1.1.1
   flutter_lints: ^3.0.0
   flutter_test:
     sdk: flutter

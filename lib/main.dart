@@ -105,7 +105,7 @@ class FlameCompetitionGame extends FlameGame
   }
 
   Future<void> restartGame() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 3));
     state = GameState.intro;
     mapAdded = 1;
     world.removeWhere((c) => c is Fish);

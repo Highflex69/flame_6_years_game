@@ -63,7 +63,10 @@ class Fish extends SpriteAnimationComponent
       if (gameRef.state == GameState.gameOver) {
         gameRef.setScore(addFishCaughtCount: 1);
         gameRef.player.add(
-          SpriteAnimationComponent(animation: animation, size: size),
+          SpriteAnimationComponent(
+            animation: animation,
+            size: Vector2.all(150),
+          ),
         );
         removeFromParent();
       }

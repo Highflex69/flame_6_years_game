@@ -32,7 +32,6 @@ class SeaMap extends PositionComponent with HasGameRef<FlameCompetitionGame> {
         ),
         Paint()
           ..color = const Color.fromRGBO(157, 162, 177, 0.7)
-          ..strokeJoin = StrokeJoin.bevel
           ..strokeWidth = 5,
       );
     }
