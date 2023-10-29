@@ -1,8 +1,8 @@
+import 'package:deep_fishing/main.dart';
+import 'package:deep_fishing/player.dart';
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled/main.dart';
-import 'package:untitled/player.dart';
 
 class SeaMap extends PositionComponent with HasGameRef<FlameCompetitionGame> {
   static const double widthSize = 1000;

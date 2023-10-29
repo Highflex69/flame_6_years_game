@@ -1,12 +1,13 @@
 import 'dart:math';
+
+import 'package:deep_fishing/fish.dart';
+import 'package:deep_fishing/map.dart';
+import 'package:deep_fishing/player.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled/fish.dart';
-import 'package:untitled/map.dart';
-import 'package:untitled/player.dart';
 
 final rng = Random();
 

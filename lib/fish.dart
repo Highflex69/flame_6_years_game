@@ -1,10 +1,10 @@
+import 'package:deep_fishing/main.dart';
+import 'package:deep_fishing/map.dart';
+import 'package:deep_fishing/player.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
-import 'package:untitled/main.dart';
-import 'package:untitled/map.dart';
-import 'package:untitled/player.dart';
 
 class Fish extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame> {

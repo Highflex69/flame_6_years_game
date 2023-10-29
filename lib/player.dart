@@ -1,8 +1,8 @@
+import 'package:deep_fishing/main.dart';
+import 'package:deep_fishing/map.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
-import 'package:untitled/main.dart';
-import 'package:untitled/map.dart';
 
 class Player extends SpriteComponent
     with CollisionCallbacks, HasGameRef<FlameCompetitionGame>, KeyboardHandler {
