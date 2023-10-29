@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:deep_fishing/fish.dart';
 import 'package:deep_fishing/map.dart';
 import 'package:deep_fishing/player.dart';
@@ -26,19 +25,6 @@ class FlameCompetitionGame extends FlameGame
   int _score = 0;
   int _highScore = 0;
 
-  void setScore({int? newScore, int? addFishCaughtCount}) {
-    if (newScore != null) {
-      _score = newScore;
-    }
-    if (addFishCaughtCount != null) {
-      _score += addFishCaughtCount * 10;
-    }
-    if (state == GameState.gameOver) {
-      _highScore = _highScore < _score ? _score : _highScore;
-    }
-    scoreText.text = 'Score: $_score Highscore: $_highScore';
-  }
-
   @override
   Future<void> onLoad() async {
     await super.onLoad();
@@ -47,10 +33,7 @@ class FlameCompetitionGame extends FlameGame
     _generateFishes();
     camera.follow(player, maxSpeed: 600);
     camera.viewport.add(
-      scoreText = TextComponent(
-        position: Vector2.all(20),
-        scale: Vector2.all(1.5),
-      ),
+      scoreText = TextComponent(position: Vector2.all(20)),
     );
     setScore(newScore: 0);
   }
@@ -67,10 +50,17 @@ class FlameCompetitionGame extends FlameGame
     }
   }
 
-  void _generateFishes({double? minStartPosY}) {
-    for (var i = 0; i < (SeaMap.heightSize / Fish.maxSize * 0.65); i++) {
-      world.add(Fish(minStartPosY: minStartPosY));
+  void setScore({int? newScore, int? addFishCaughtCount}) {
+    if (newScore != null) {
+      _score = newScore;
     }
+    if (addFishCaughtCount != null) {
+      _score += addFishCaughtCount * 10;
+    }
+    if (state == GameState.gameOver) {
+      _highScore = _highScore < _score ? _score : _highScore;
+    }
+    scoreText.text = 'Score: $_score Highscore: $_highScore';
   }
 
   void generateMap() {
@@ -113,10 +103,12 @@ class FlameCompetitionGame extends FlameGame
     player.removeWhere((c) => c is SpriteAnimationComponent);
     _generateFishes();
   }
+
+  void _generateFishes({double? minStartPosY}) {
+    for (var i = 0; i < (SeaMap.heightSize / Fish.maxSize * 0.65); i++) {
+      world.add(Fish(minStartPosY: minStartPosY));
+    }
+  }
 }
 
-enum GameState {
-  intro,
-  playing,
-  gameOver;
-}
+enum GameState { intro, playing, gameOver }
